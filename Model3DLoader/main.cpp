@@ -4,8 +4,15 @@
 #include <fstream>
 #include <sstream>
 
+#include "glm/glm.hpp"
+#include "glm/gtc/matrix_transform.hpp"
+#include "glm/gtc/quaternion.hpp"
+
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+
+#include "time.hpp"
+#include "camera.hpp"
 
 GLFWwindow* window;
 
@@ -102,9 +109,25 @@ public:
 };
 
 void events() {
+
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 		glfwSetWindowShouldClose(window, true);
 
+	float dt = current_time - prev_time;
+
+	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+		cam->processKeyboard(Camera_Movement::FORWARD, dt);
+
+	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+		cam->processKeyboard(Camera_Movement::BACKWARD, dt);
+	
+	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+		cam->processKeyboard(Camera_Movement::LEFT, dt);
+	
+	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+		cam->processKeyboard(Camera_Movement::RIGHT, dt);
+
+	std::cout << "camera position: (" << cam->position.x << ", " << cam->position.y << ", " << cam->position.z << ")\n";
 }
 
 int main() {
@@ -135,7 +158,6 @@ int main() {
 		return -1;
 	}
 
-	glEnable(GL_DEPTH_TEST);
 
 	const GLubyte* version = glGetString(GL_VERSION);
 	if (version != nullptr) {
@@ -148,9 +170,17 @@ int main() {
 
 	glShadeModel(GL_SMOOTH);
 
+	cam = new Camera();
+
+	current_time = glfwGetTime();
+	prev_time = current_time;
+
 	// main program loop
 	while (!glfwWindowShouldClose(window))
 	{
+		prev_time = current_time;
+		current_time = glfwGetTime();
+
 
 		// events
 		events();

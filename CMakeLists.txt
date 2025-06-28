@@ -11,6 +11,7 @@ add_executable(${PROJECT_NAME}
 
 # headers
 target_sources(${PROJECT_NAME} PRIVATE
+    Model3DLoader/time.hpp
     Model3DLoader/camera.hpp
 )
 
