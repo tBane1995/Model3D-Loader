@@ -11,8 +11,15 @@ add_executable(${PROJECT_NAME}
 
 # headers
 target_sources(${PROJECT_NAME} PRIVATE
-    Model3DLoader/time.hpp
-    Model3DLoader/camera.hpp
+    Model3DLoader/WideUTF8Converter.hpp
+    Model3DLoader/Time.hpp
+    Model3DLoader/Camera.hpp
+    Model3DLoader/Transform.hpp
+    Model3DLoader/stb_image.h
+    Model3DLoader/Textures.hpp
+    Model3DLoader/Shaders.hpp
+    Model3DLoader/Programs.hpp
+    Model3DLoader/Model3D.hpp
 )
 
 # Standard C++

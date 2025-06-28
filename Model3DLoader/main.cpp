@@ -11,102 +11,21 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
-#include "time.hpp"
-#include "camera.hpp"
+#include "WideUTF8Converter.hpp"
+
+#include "Time.hpp"
+#include "Camera.hpp"
+#include "Transform.hpp"
+
+#define STB_IMAGE_IMPLEMENTATION	// for work of stb_image.h
+#include "stb_image.h"
+
+#include "Textures.hpp"
+#include "Shaders.hpp"
+#include "Programs.hpp"
+#include "Model3D.hpp"
 
 GLFWwindow* window;
-
-std::string ConvertWideToUtf8(std::wstring wide) {
-	return std::string(wide.begin(), wide.end());
-}
-
-class Model3D {
-public:
-
-	std::vector < float > v;	// vertices
-	std::vector < float > vt;	// texture uv
-	std::vector < float > vn;	// normals
-
-	std::vector < std::vector < unsigned int > > meshes;	// ?? // std::vector < face > meshes
-	//std::vector < Texture* > textures;
-
-	unsigned int VAO;
-
-
-	Model3D() {
-
-	}
-
-	~Model3D() {
-
-		v.clear();	// vertices
-		vt.clear();	// texture uv
-		vn.clear();	// normals
-
-		meshes.clear();
-
-	}
-
-	void load(std::wstring path) {
-
-		std::wifstream file(path);
-		if (!file.is_open()) {
-			std::cout << "can't open file : " << ConvertWideToUtf8(path) << "\n";
-			return;
-		}
-
-		std::wstring line;
-		while (std::getline(file, line)) {
-
-			std::cout << ConvertWideToUtf8(line) << "\n";
-
-			if (line.empty())
-				continue;
-
-			std::wistringstream wstream(line);
-
-			std::wstring prefix;
-			wstream >> prefix;
-
-			if (prefix == L"v") {
-				// vertice
-				float x, y, z;
-				wstream >> x >> y >> z;
-
-				v.push_back(x);
-				v.push_back(y);
-				v.push_back(z);
-			}
-			else if (prefix == L"vt") {
-				// texture uv
-				float u, v;
-				wstream >> u >> v;
-
-				vt.push_back(u);
-				vt.push_back(v);
-			}
-			else if (prefix == L"vn") {
-				// normal
-				float nx, ny, nz;
-				wstream >> nx >> ny >> nz;
-
-				vn.push_back(nx);
-				vn.push_back(ny);
-				vn.push_back(nz);
-			}
-			else if (prefix == L"f") {
-				// face
-				// TO-DO
-			}
-		}
-
-
-	}
-
-	void draw() {
-
-	}
-};
 
 void events() {
 
@@ -127,12 +46,12 @@ void events() {
 	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
 		cam->processKeyboard(Camera_Movement::RIGHT, dt);
 
-	std::cout << "camera position: (" << cam->position.x << ", " << cam->position.y << ", " << cam->position.z << ")\n";
+	//std::cout << "camera position: (" << cam->position.x << ", " << cam->position.y << ", " << cam->position.z << ")\n";
 }
 
 int main() {
-	Model3D test_mdl;
-	test_mdl.load(L"mdl\\fir_tree.obj");
+
+	
 
 	// initialize glfw
 	glfwInit();
@@ -171,7 +90,21 @@ int main() {
 	glShadeModel(GL_SMOOTH);
 
 	cam = new Camera();
+	cam->setPosition(glm::vec3(0, 5, 15));
 
+	// load textures
+	add_texture(L"tex\\black");
+	//add_texture(L"tex\\green");
+	//add_texture(L"tex\\brown");
+
+	// load programs
+	addProgram(vertex_shader_with_light_source, fragment_shader_with_light_source);
+
+	// load test_model
+	Model3D test_mdl;
+	test_mdl.load(L"mdl\\fir_tree.obj");
+
+	// timers start
 	current_time = glfwGetTime();
 	prev_time = current_time;
 
@@ -189,9 +122,7 @@ int main() {
 		glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		//
-		// .. rendering objects
-		//
+		test_mdl.draw();
 
 		// render - submit
 		glfwSwapBuffers(window);

@@ -1,5 +1,5 @@
-#ifndef time_hpp
-#define time_hpp
+#ifndef Time_hpp
+#define Time_hpp
 
 float current_time;
 float prev_time;

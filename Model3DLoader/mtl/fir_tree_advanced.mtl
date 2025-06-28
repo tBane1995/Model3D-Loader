@@ -2,7 +2,7 @@
 # www.blender.org
 # material created by tBane
 
-newmtl fir_tree_brown
+newmtl fire_tree_advanced_brown
 Ns 10.000000
 Ka 1.000000 1.000000 1.000000
 Ks 0.000000 0.000000 0.000000
@@ -12,7 +12,7 @@ d 1.000000
 illum 2
 map_Kd Textures/Brown.png
 
-newmtl fir_tree_green
+newmtl fire_tree_advanced_green
 Ns 10.000000
 Ka 1.000000 1.000000 1.000000
 Ks 0.000000 0.000000 0.000000

@@ -1,5 +1,5 @@
-#ifndef camera_hpp
-#define camera_hpp
+#ifndef Camera_hpp
+#define Camera_hpp
 
 enum class Camera_Movement { FORWARD, BACKWARD, LEFT, RIGHT };
 
