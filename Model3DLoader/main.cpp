@@ -4,6 +4,11 @@
 #include <fstream>
 #include <sstream>
 
+#include <glad/glad.h>
+#include <GLFW/glfw3.h>
+
+GLFWwindow* window;
+
 std::string ConvertWideToUtf8(std::wstring wide) {
 	return std::string(wide.begin(), wide.end());
 }
@@ -96,9 +101,76 @@ public:
 	}
 };
 
+void events() {
+	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+		glfwSetWindowShouldClose(window, true);
+
+}
+
 int main() {
 	Model3D test_mdl;
 	test_mdl.load(L"mdl\\fir_tree.obj");
+
+	// initialize glfw
+	glfwInit();
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
+	window = glfwCreateWindow(800, 600, "Model3D Loader", NULL, NULL);
+
+	if (window == NULL) {
+		std::cout << "Failed to create window" << std::endl;
+		glfwTerminate();
+		return -1;
+	}
+
+	// set the context
+	glfwMakeContextCurrent(window);
+
+	// initialize glad
+	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
+	{
+		std::cout << "Failed to initialize GLAD" << std::endl;
+		return -1;
+	}
+
+	glEnable(GL_DEPTH_TEST);
+
+	const GLubyte* version = glGetString(GL_VERSION);
+	if (version != nullptr) {
+		std::cout << "OpenGL version: " << version << std::endl;
+	}
+
+	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	glShadeModel(GL_SMOOTH);
+
+	// main program loop
+	while (!glfwWindowShouldClose(window))
+	{
+
+		// events
+		events();
+
+		// render - clear
+		glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		//
+		// .. rendering objects
+		//
+
+		// render - submit
+		glfwSwapBuffers(window);
+		glfwPollEvents();
+
+	}
+
+
+
 
 	return 0;
 }
