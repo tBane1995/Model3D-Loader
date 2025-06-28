@@ -22,7 +22,7 @@
 4. Otwórz **Wiersz poleceń (cmd)**.
 5. Przejdź do katalogu projektu:
 `
-cd ..\..\Easy Notepad
+cd ..\..\Model3D Loader
 `
 6. Utwórz folder **build**:
 `
