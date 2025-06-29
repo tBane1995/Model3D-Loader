@@ -195,9 +195,9 @@ public:
             glUniformMatrix4fv(glGetUniformLocation(program->shader_program, "view"), 1, GL_FALSE, &view[0][0]);
             glUniformMatrix4fv(glGetUniformLocation(program->shader_program, "model"), 1, GL_FALSE, &model[0][0]);
 
-            glm::vec3 lightPos = glm::vec3(-5, 5, 0);
-            static float lightPower = 1.0f;
-            lightPower += 0.005f;
+            glm::vec3 lightPos = glm::vec3(0, 10, 0);
+            static float lightPower = 10.0f;
+            //lightPower += 0.005f;
             static float lightRange = 1.0f;
             //lightRange += 0.0001f;
 

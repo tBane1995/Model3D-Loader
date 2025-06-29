@@ -1,8 +1,8 @@
-# Blender 4.3.0 MTL
+# Blender 4.3.0 MTL File: 'None'
 # www.blender.org
 # material created by tBane
 
-newmtl fir_tree_advanced_brown
+newmtl oak_tree_brown
 Ns 10.000000
 Ka 1.000000 1.000000 1.000000
 Ks 0.000000 0.000000 0.000000
@@ -12,7 +12,7 @@ d 1.000000
 illum 2
 map_Kd tex\brown.png
 
-newmtl fir_tree_advanced_green
+newmtl oak_tree_green
 Ns 10.000000
 Ka 1.000000 1.000000 1.000000
 Ks 0.000000 0.000000 0.000000

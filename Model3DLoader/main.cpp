@@ -34,6 +34,7 @@ void events() {
 
 	float dt = current_time - prev_time;
 
+	// WASD
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
 		cam->processKeyboard(Camera_Movement::FORWARD, dt);
 
@@ -44,6 +45,19 @@ void events() {
 		cam->processKeyboard(Camera_Movement::LEFT, dt);
 	
 	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+		cam->processKeyboard(Camera_Movement::RIGHT, dt);
+
+	// DIRECTION KEYS
+	if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
+		cam->processKeyboard(Camera_Movement::FORWARD, dt);
+
+	if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
+		cam->processKeyboard(Camera_Movement::BACKWARD, dt);
+
+	if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
+		cam->processKeyboard(Camera_Movement::LEFT, dt);
+
+	if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
 		cam->processKeyboard(Camera_Movement::RIGHT, dt);
 
 	//std::cout << "camera position: (" << cam->position.x << ", " << cam->position.y << ", " << cam->position.z << ")\n";
@@ -101,8 +115,13 @@ int main() {
 	addProgram(vertex_shader_with_light_source, fragment_shader_with_light_source);
 
 	// load test_model
-	Model3D test_mdl;
-	test_mdl.load(L"mdl\\fir_tree.obj");
+	Model3D test_mdl_1;
+	test_mdl_1.load(L"mdl\\fir_tree.obj");
+	test_mdl_1.setPosition(-3, 0, 0);
+
+	Model3D test_mdl_2;
+	test_mdl_2.load(L"mdl\\oak_tree.obj");
+	test_mdl_2.setPosition(3, 0, 0);
 
 	// timers start
 	current_time = glfwGetTime();
@@ -122,7 +141,8 @@ int main() {
 		glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		test_mdl.draw();
+		test_mdl_1.draw();
+		test_mdl_2.draw();
 
 		// render - submit
 		glfwSwapBuffers(window);

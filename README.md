@@ -12,6 +12,8 @@
 
 ## Zrzuty ekranu
 ![Zrzut ekranu](screenshots/01.png)
+![Zrzut ekranu](screenshots/02.png)
+![Zrzut ekranu](screenshots/03.png)
 
 ## Instalacja
 ## Instalacja
@@ -46,15 +48,35 @@ cmake --build .
 Program stworzono w języku C++ z wykorzystaniem bibliotek OpenGL 3.3.0, GLAD oraz GLFW 3.4.
   
 ## Licencja
-Licencja Otwarta – Uznanie autorstwa  
-  
-Ten program może być:  
--Pobierany  
--Kopiowany  
--Modyfikowany  
--Wykorzystywany w projektach prywatnych i komercyjnych  
-  
-Pod warunkiem, że:  
--Zachowana zostanie informacja o autorze oryginalnego programu  
--Podane zostanie źródło (link do repozytorium)  
--W przypadku modyfikacji, należy wyraźnie zaznaczyć, że program został zmodyfikowany oraz przez kogo.  
+**Licencja MIT**
+
+Copyright (c) 2025 tBane
+
+Niniejszym udziela się bezpłatnego pozwolenia każdej osobie, która uzyska kopię
+tego oprogramowania i powiązanych plików dokumentacji („Oprogramowanie”), na obrót
+Oprogramowaniem bez ograniczeń, w tym bez ograniczeń prawa
+do korzystania, kopiowania, modyfikowania, łączenia, publikowania, dystrybuowania, udzielania sublicencji i/lub sprzedaży
+kopii Oprogramowania oraz zezwalania osobom, którym Oprogramowanie jest
+dostarczane, na takie działanie, z zastrzeżeniem następujących warunków:
+
+Powyższa informacja o prawach autorskich i niniejsza informacja o zezwoleniu powinny być zawarte
+we wszystkich kopiach lub znacznych częściach Oprogramowania.
+
+OPROGRAMOWANIE JEST DOSTARCZANE „TAKIE, JAKIE JEST”, BEZ ŻADNEJ GWARANCJI, WYRAŹNEJ LUB
+DOROZUMIANEJ, W TYM MIĘDZY INNYMI GWARANCJI PRZYDATNOŚCI HANDLOWEJ,
+PRZYDATNOŚCI DO OKREŚLONEGO CELU I NIENARUSZALNOŚCI. W ŻADNYM WYPADKU
+AUTORZY LUB POSIADACZE PRAW AUTORSKICH NIE PONOSZĄ ODPOWIEDZIALNOŚCI ZA ŻADNE ROSZCZENIA, SZKODY LUB INNĄ
+ODPOWIEDZIALNOŚĆ...
+
+---
+
+Używane biblioteki stron trzecich:
+
+To oprogramowanie używa następujących bibliotek stron trzecich:
+
+- **GLAD** - licencjonowane na podstawie licencji MIT
+- **GLFW** - licencjonowane na podstawie licencji zlib/libpng
+- **GLM** - licencjonowane na podstawie licencji MIT
+- **stb_image.h** - udostępnione w domenie publicznej (przez Seana Barretta)
+
+Więcej informacji można znaleźć w odpowiednich plikach licencyjnych dołączonych do kodu źródłowego.
