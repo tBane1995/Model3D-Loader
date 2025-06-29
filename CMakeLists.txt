@@ -12,6 +12,7 @@ add_executable(${PROJECT_NAME}
 # headers
 target_sources(${PROJECT_NAME} PRIVATE
     Model3DLoader/WideUTF8Converter.hpp
+    Model3DLoader/Window.hpp
     Model3DLoader/Time.hpp
     Model3DLoader/Camera.hpp
     Model3DLoader/Transform.hpp

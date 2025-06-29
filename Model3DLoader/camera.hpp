@@ -17,7 +17,7 @@ public:
 
     // camera options
     float movementSpeed;
-    float mouseSensitivity;
+    glm::vec2 mouseSensitivity;
     float zoom;
 
     Camera(glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f), float yaw = -90.0f, float pitch = 0.0f) {
@@ -29,7 +29,13 @@ public:
         front = glm::vec3(0.0f, 0.0f, -1.0f);
 
         movementSpeed = 10.0f;
-        mouseSensitivity = 0.1f;
+
+        int w, h;
+        glfwGetWindowSize(window, &w, &h);
+
+        mouseSensitivity.x = 90.0f / float(w);
+        mouseSensitivity.y = 90.0f / float(h);
+
         zoom = 45.0f;
 
         updateCameraVectors();
@@ -71,8 +77,8 @@ public:
 
     void processMouseMovement(float xoffset, float yoffset, GLboolean constrainPitch = true)
     {
-        xoffset *= mouseSensitivity * 2.0f;
-        yoffset *= mouseSensitivity * 2.0f;
+        xoffset *= mouseSensitivity.x;
+        yoffset *= mouseSensitivity.y;
 
         yaw += xoffset;
         pitch += yoffset;

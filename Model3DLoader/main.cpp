@@ -1,4 +1,4 @@
-#include <iostream>
+﻿#include <iostream>
 #include <vector>
 #include <string>
 #include <fstream>
@@ -13,6 +13,7 @@
 
 #include "WideUTF8Converter.hpp"
 
+#include "Window.hpp"
 #include "Time.hpp"
 #include "Camera.hpp"
 #include "Transform.hpp"
@@ -26,7 +27,8 @@
 #include "Materials.hpp"
 #include "Model3D.hpp"
 
-GLFWwindow* window;
+
+bool cur_press;
 double cur_pos_x, cur_pos_y;	// cursor position
 
 void events() {
@@ -62,15 +64,30 @@ void events() {
 	if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
 		cam->processKeyboard(Camera_Movement::RIGHT, dt);
 	
-	double new_cur_pos_x, new_cur_pos_y;
-	glfwGetCursorPos(window, &new_cur_pos_x, &new_cur_pos_y);
 
-	if (float(new_cur_pos_x) != cur_pos_x || float(new_cur_pos_y) != cur_pos_y) {
-		cam->processMouseMovement(new_cur_pos_x - cur_pos_x, cur_pos_y - new_cur_pos_y);
-		cur_pos_x = new_cur_pos_x;
-		cur_pos_y = new_cur_pos_y;
 
+	if (glfwGetMouseButton(window, 0) == GLFW_PRESS) {
+
+		if (cur_press == false) {
+			glfwGetCursorPos(window, &cur_pos_x, &cur_pos_y);
+			cur_press = true;
+		}
+
+		double new_cur_pos_x, new_cur_pos_y;
+		glfwGetCursorPos(window, &new_cur_pos_x, &new_cur_pos_y);
+
+		if (float(new_cur_pos_x) != cur_pos_x || float(new_cur_pos_y) != cur_pos_y) {
+			cam->processMouseMovement(new_cur_pos_x - cur_pos_x, cur_pos_y - new_cur_pos_y);
+			cur_pos_x = new_cur_pos_x;
+			cur_pos_y = new_cur_pos_y;
+
+		}
+	}else if(glfwGetMouseButton(window, 0) == GLFW_RELEASE) {
+
+		cur_press = false;
 	}
+
+	
 
 
 	//std::cout << "camera position: (" << cam->position.x << ", " << cam->position.y << ", " << cam->position.z << ")\n";
@@ -123,6 +140,7 @@ int main() {
 	addTexture(L"tex\\black");
 	addTexture(L"tex\\green");
 	addTexture(L"tex\\brown");
+	addTexture(L"tex\\KnightTexture");
 
 	// load programs
 	addProgram(L"normal program", vertex_shader_source, fragment_shader_source);
@@ -131,7 +149,7 @@ int main() {
 	// load materials
 	addLibMaterials(L"mtl\\fir_tree.mtl");
 	addLibMaterials(L"mtl\\oak_tree.mtl");
-	addLibMaterials(L"mtl\\oak2_tree.mtl");
+	addLibMaterials(L"mtl\\Knight.mtl");
 
 	// load test_model
 	Model3D test_mdl_1;
@@ -142,7 +160,14 @@ int main() {
 	test_mdl_2.load(L"mdl\\oak_tree.obj");
 	test_mdl_2.setPosition(3, 0, 0);
 
+	Model3D test_model_unit;
+	test_model_unit.load(L"mdl\\Knight.obj");
+	test_model_unit.setScale(2, 2, 2);
+	test_model_unit.setPosition(0, 0, 5);
+
+
 	// cursor position
+	cur_press = false;
 	glfwGetCursorPos(window, &cur_pos_x, &cur_pos_y);
 
 	// timers start
@@ -165,6 +190,7 @@ int main() {
 
 		test_mdl_1.draw();
 		test_mdl_2.draw();
+		test_model_unit.draw();
 
 		// render - submit
 		glfwSwapBuffers(window);
