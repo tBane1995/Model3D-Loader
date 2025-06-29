@@ -46,9 +46,17 @@ public:
 
 std::vector < Texture* > textures;
 
-void add_texture(std::wstring path) {
-
+void addTexture(std::wstring path) {
     textures.push_back(new Texture(path, textures.size()));
-    std::wcout << L"loaded tex: " << path << "\n";
+    std::wcout << L"loaded texture: " << path << "\n";
+}
+
+Texture* getTexture(std::wstring path) {
+
+    for (auto& t : textures)
+        if (t->path == path)
+            return t;
+
+    return nullptr;
 }
 #endif

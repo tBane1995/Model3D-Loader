@@ -9,7 +9,8 @@ struct vertice {
 
 struct Mesh {
     std::vector<vertice> vertices;
-    Texture* texture;
+    Material* material;
+    //Texture* texture;
 };
 
 
@@ -48,7 +49,7 @@ public:
 
         std::wstring line;
         Mesh currentMesh;
-        currentMesh.texture = nullptr;
+        currentMesh.material = nullptr;
 
         while (std::getline(file, line)) {
             std::wistringstream ss(line);
@@ -78,10 +79,7 @@ public:
                     currentMesh.vertices.clear();
                 }
 
-                
-                if(mtl == L"fire_tree_green") currentMesh.texture = textures[1];
-                else if(mtl == L"fire_tree_brown") currentMesh.texture = textures[2];
-                else currentMesh.texture = textures[0];
+                currentMesh.material = getMaterial(mtl);
                    
             }
             else if (prefix == L"f") {
@@ -162,7 +160,7 @@ public:
 
     void draw() {
 
-        Program* program = programs[0];
+        Program* program = getProgram(L"normal program");
 
         glBindVertexArray(VAO);
         
@@ -173,8 +171,8 @@ public:
 
             glActiveTexture(GL_TEXTURE0);
 
-            (meshes[i].texture)? glBindTexture(GL_TEXTURE_2D, meshes[i].texture->id) : glBindTexture(GL_TEXTURE_2D, -1);
-                
+            (meshes[i].material)? glBindTexture(GL_TEXTURE_2D, meshes[i].material->texture->id) : glBindTexture(GL_TEXTURE_2D, 0);
+          
             glUniform1i(glGetUniformLocation(program->shader_program, "texture1"), 0);
             glUniform3f(glGetUniformLocation(program->shader_program, "fogColor"), 0.25f, 0.25f, 0.25f);
             glUniform1f(glGetUniformLocation(program->shader_program, "fogStart"), 1.0f);
@@ -196,9 +194,9 @@ public:
             glUniformMatrix4fv(glGetUniformLocation(program->shader_program, "model"), 1, GL_FALSE, &model[0][0]);
 
             glm::vec3 lightPos = glm::vec3(0, 10, 0);
-            static float lightPower = 10.0f;
+            static float lightPower = 1.0f;
             //lightPower += 0.005f;
-            static float lightRange = 1.0f;
+            static float lightRange = 10.0f;
             //lightRange += 0.0001f;
 
             // Pozycje światła i kamery
