@@ -178,8 +178,13 @@ const char* fragment_shader_with_light_source = R"(
     uniform sampler2D texture1;
 
     uniform vec3 LightPosition;
+    uniform vec3 LightColor;
     uniform float LightPower;
     uniform float LightRange;
+   
+    uniform vec3 Ka;
+    uniform vec3 Ks;    
+    uniform vec3 Ke;    
 
     out vec4 FragColor;
 
@@ -188,17 +193,24 @@ const char* fragment_shader_with_light_source = R"(
         // Diffuse Light - światło rozproszone
         // Specular Light - światło odbite
         // Ambient - światło bazowe
-
+        
+        // Diffuse
         vec3 norm = normalize(Normal);
         vec3 lightDir = normalize(LightPosition - FragPosition);
+        float diff = max(dot(norm, lightDir)*LightRange, 0.0f);
+        vec3 diffuse = LightColor * LightPower * diff;
         
-        float diffuse = max(dot(norm, lightDir)*LightRange, 0.0f);
-        float ambient = 0.0f;
+        // Specular
+        vec3 specular = Ks;
 
+        // Ambient
+        vec3 ambient = Ka;
+        
+        // Texture
         vec3 textureColor = texture(texture1, TexCoord).rgb;
 
         // Finalny kolor
-        vec3 result = (diffuse*LightPower + ambient) * textureColor;
+        vec3 result = (diffuse + specular + ambient) * textureColor;
         FragColor = vec4(result, 1.0);
     }
 )";

@@ -37,7 +37,7 @@ public:
         transform.setScale(glm::vec3(x, y, z));
     }
 
-    void load(std::wstring path) {
+    void loadObj(std::wstring path) {
         meshes.clear();
         v.clear(); vt.clear(); vn.clear();
 
@@ -160,7 +160,7 @@ public:
 
     void draw() {
 
-        Program* program = getProgram(L"normal program");
+        Program* program = getProgram(L"advanced program");
 
         glBindVertexArray(VAO);
         
@@ -193,16 +193,24 @@ public:
             glUniformMatrix4fv(glGetUniformLocation(program->shader_program, "view"), 1, GL_FALSE, &view[0][0]);
             glUniformMatrix4fv(glGetUniformLocation(program->shader_program, "model"), 1, GL_FALSE, &model[0][0]);
 
-            glm::vec3 lightPos = glm::vec3(0, 10, 0);
-            static float lightPower = 1.0f;
-            //lightPower += 0.005f;
+            glm::vec3 lightPos = glm::vec3(-10, 10, 0);
+            glm::vec3 lightColor = glm::vec3(1.0f, 1.0f, 1.0f);
+            static float lightPower = 0.1f;
+            //lightPower += 0.00005f;   
             static float lightRange = 10.0f;
             //lightRange += 0.0001f;
+            
+
 
             // Pozycje światła i kamery
             glUniform3f(glGetUniformLocation(program->shader_program, "LightPosition"), lightPos.x, lightPos.y, lightPos.z);
+            glUniform3fv(glGetUniformLocation(program->shader_program, "LightColor"), 1, &lightColor[0]);
             glUniform1f(glGetUniformLocation(program->shader_program, "LightPower"), lightPower);
             glUniform1f(glGetUniformLocation(program->shader_program, "LightRange"), lightRange);
+
+            glUniform3fv(glGetUniformLocation(program->shader_program, "Ka"), 1, &meshes[i].material->Ka[0]);
+            glUniform3fv(glGetUniformLocation(program->shader_program, "Ks"), 1, &meshes[i].material->Ks[0]);
+            //glUniform3fv(glGetUniformLocation(program->shader_program, "Ke"), 1, &meshes[i].material->Ks[0]);
 
             auto [offset, count] = mesh_draw_ranges[i];
             glDrawArrays(GL_TRIANGLES, offset, count);

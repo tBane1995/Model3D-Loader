@@ -140,7 +140,10 @@ int main() {
 	addTexture(L"tex\\black");
 	addTexture(L"tex\\green");
 	addTexture(L"tex\\brown");
+	addTexture(L"tex\\gray");
+	addTexture(L"tex\\grass");
 	addTexture(L"tex\\KnightTexture");
+	
 
 	// load programs
 	addProgram(L"normal program", vertex_shader_source, fragment_shader_source);
@@ -150,21 +153,32 @@ int main() {
 	addLibMaterials(L"mtl\\fir_tree.mtl");
 	addLibMaterials(L"mtl\\oak_tree.mtl");
 	addLibMaterials(L"mtl\\Knight.mtl");
+	addLibMaterials(L"mtl\\tree.mtl");
+	addLibMaterials(L"mtl\\rock.mtl");
+	addLibMaterials(L"mtl\\grass.mtl");
 
 	// load test_model
-	Model3D test_mdl_1;
-	test_mdl_1.load(L"mdl\\fir_tree.obj");
-	test_mdl_1.setPosition(-3, 0, 0);
+	Model3D plane;
+	plane.loadObj(L"mdl\\grass.obj");
+	plane.setPosition(0, 0, 0);
 
-	Model3D test_mdl_2;
-	test_mdl_2.load(L"mdl\\oak_tree.obj");
-	test_mdl_2.setPosition(3, 0, 0);
+	Model3D left_tree;
+	left_tree.loadObj(L"mdl\\fir_tree.obj");
+	left_tree.setPosition(-5, 0, 0);
 
-	Model3D test_model_unit;
-	test_model_unit.load(L"mdl\\Knight.obj");
-	test_model_unit.setScale(2, 2, 2);
-	test_model_unit.setPosition(0, 0, 5);
+	Model3D right_tree;
+	right_tree.loadObj(L"mdl\\tree.obj");
+	right_tree.setPosition(5, 0, 0);
 
+	Model3D knight;
+	knight.loadObj(L"mdl\\Knight.obj");
+	knight.setScale(2, 2, 2);
+	knight.setPosition(0, 0, 5);
+
+	Model3D rock;
+	rock.loadObj(L"mdl\\rock.obj");
+	rock.setScale(2, 2, 2);
+	rock.setPosition(0, 0, -5);
 
 	// cursor position
 	cur_press = false;
@@ -188,9 +202,11 @@ int main() {
 		glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		test_mdl_1.draw();
-		test_mdl_2.draw();
-		test_model_unit.draw();
+		plane.draw();
+		left_tree.draw();
+		right_tree.draw();
+		knight.draw();
+		rock.draw();
 
 		// render - submit
 		glfwSwapBuffers(window);

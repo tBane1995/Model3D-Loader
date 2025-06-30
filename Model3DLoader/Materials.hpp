@@ -5,10 +5,10 @@ class Material {
 public:
 
     std::wstring name;
-    float Ns;           // Ns - Specular exponent (shininess)
-    float Ka, Ks, Ke;   // Ka, Ks, Ke - Ambient, Specular, Emissive Color
-    float Ni;           // Ni - Optical density
-    float d;            // d - Dissolve
+    float Ns;               // Ns - Specular exponent (shininess)
+    glm::vec3 Ka, Ks, Ke;   // Ka, Ks, Ke - Ambient, Specular, Emissive Color
+    float Ni;               // Ni - Optical density
+    float d;                // d - Dissolve
     
     int illum;          // illum – modele oświetlenia
                         // illum 1 – tylko kolor podstawowy i ambient(bez refleksów).
@@ -63,6 +63,16 @@ void addLibMaterials(std::wstring path) {
             ss >> tname;
             std::wcout << tname << L"\n";
             mtl->texture = getTexture(tname);
+        }
+        else if (prefix == L"Ka") {
+            ss >> mtl->Ka.x;
+            ss >> mtl->Ka.y;
+            ss >> mtl->Ka.z;
+        }
+        else if (prefix == L"Ks") {
+            ss >> mtl->Ks.x;
+            ss >> mtl->Ks.y;
+            ss >> mtl->Ks.z;
         }
     }
 
