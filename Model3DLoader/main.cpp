@@ -10,6 +10,7 @@
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#include <fbxsdk.h>
 
 #include "WideUTF8Converter.hpp"
 
@@ -133,9 +134,12 @@ int main() {
 
 	glShadeModel(GL_SMOOTH);
 
+	
 	cam = new Camera();
 	cam->setPosition(glm::vec3(0, 5, 15));
+	
 
+	
 	// load textures
 	addTexture(L"tex\\black");
 	addTexture(L"tex\\green");
@@ -145,10 +149,13 @@ int main() {
 	addTexture(L"tex\\KnightTexture");
 	
 
+	
 	// load programs
 	addProgram(L"normal program", vertex_shader_source, fragment_shader_source);
 	addProgram(L"advanced program", vertex_shader_with_light_source, fragment_shader_with_light_source);
+	
 
+	
 	// load materials
 	addLibMaterials(L"mtl\\fir_tree.mtl");
 	addLibMaterials(L"mtl\\oak_tree.mtl");
@@ -156,7 +163,9 @@ int main() {
 	addLibMaterials(L"mtl\\tree.mtl");
 	addLibMaterials(L"mtl\\rock.mtl");
 	addLibMaterials(L"mtl\\grass.mtl");
+	
 
+	
 	// load test_model
 	Model3D plane;
 	plane.loadObj(L"mdl\\grass.obj");
@@ -180,6 +189,10 @@ int main() {
 	rock.setScale(2, 2, 2);
 	rock.setPosition(0, 0, -5);
 
+	Model3D knightFBX;
+	knightFBX.loadFBX(L"mdl\\knight.FBX");
+	
+
 	// cursor position
 	cur_press = false;
 	glfwGetCursorPos(window, &cur_pos_x, &cur_pos_y);
@@ -202,20 +215,19 @@ int main() {
 		glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+		
 		plane.draw();
 		left_tree.draw();
 		right_tree.draw();
 		knight.draw();
 		rock.draw();
+		
 
 		// render - submit
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 
 	}
-
-
-
 
 	return 0;
 }

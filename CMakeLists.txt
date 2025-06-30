@@ -34,7 +34,7 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
 target_include_directories(${PROJECT_NAME} PRIVATE C:/glfw-3.4.bin.WIN64/include)
 target_link_directories(${PROJECT_NAME} PRIVATE C:/glfw-3.4.bin.WIN64/lib-vc2022)
 
-#  GLFW
+# GLFW
 target_link_libraries(${PROJECT_NAME} PRIVATE glfw3)
 
 # GLAD
@@ -42,6 +42,30 @@ target_link_libraries(${PROJECT_NAME} PRIVATE glad)
 
 # GLM
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/glm)
+
+# FBX SDK
+set(FBX_SDK_ROOT "C:/Program Files/Autodesk/FBX/FBX SDK/2020.3.7")
+
+# FBX include directory
+target_include_directories(${PROJECT_NAME} PRIVATE "${FBX_SDK_ROOT}/include")
+
+# FBX lib directory
+if(MSVC)
+    target_link_directories(${PROJECT_NAME} PRIVATE
+        "$<$<CONFIG:Debug>:${FBX_SDK_ROOT}/lib/x64/debug>"
+        "$<$<CONFIG:Release>:${FBX_SDK_ROOT}/lib/x64/release>"
+    )
+
+    target_link_libraries(${PROJECT_NAME} PRIVATE
+        $<$<CONFIG:Debug>:libfbxsdk-md>
+        $<$<CONFIG:Release>:libfbxsdk-md>
+    )
+
+    target_link_libraries(${PROJECT_NAME} PRIVATE
+        $<$<CONFIG:Debug>:libfbxsdk-md zlib-md libxml2-md>
+        $<$<CONFIG:Release>:libfbxsdk-md zlib-md libxml2-md>
+    )
+endif()
 
 # VS debugger path
 set_target_properties(${PROJECT_NAME} PROPERTIES

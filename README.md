@@ -14,34 +14,34 @@
 ![Zrzut ekranu](screenshots/01.png)
 
 ## Instalacja
-## Instalacja
 1. Pobierz i zainstaluje Visual Studio 2022
 2. Pobierz i zainstaluje CMake
 3. Pobierz bibliotekę GLFW 3.4 (https://www.glfw.org/) i umieść ją w katalogu `C:\glfw-3.4.bin.WIN64`.
-
-4. Otwórz **Wiersz poleceń (cmd)**.
-5. Przejdź do katalogu projektu:
+4. Pobierz i zainstaluj bibliotekę Autodesk FBX SDK vs2022(https://aps.autodesk.com/developer/overview/fbx-sdk) i umieść ją w katalogu `C:\Program Files\Autodesk\FBX\FBX SDK\2020.3.7`
+5. Otwórz **Wiersz poleceń (cmd)**.
+6. Przejdź do katalogu projektu:
 `
 cd ..\..\Model3D Loader
 `
-6. Utwórz folder **build**:
+7. Utwórz folder **build**:
 `
 mkdir build
 `
-7. Wejdź do folderu **build**:
+8. Wejdź do folderu **build**:
 `
 cd build
 `
-8. Uruchom konfigurację projektu za pomocą **CMake**:
+9. Uruchom konfigurację projektu za pomocą **CMake**:
 `
 cmake ..
 `
-9. Zbuduj projekt:
+10. Zbuduj projekt:
 `
 cmake --build .
 `
 
-10. Plik wykonywalny znajdziesz w **build/Debug** lub **build/Release**
+11. Plik wykonywalny znajdziesz w **build/Debug** lub **build/Release**
+
 ## Technologie
 Program stworzono w języku C++ z wykorzystaniem bibliotek OpenGL 3.3.0, GLAD oraz GLFW 3.4.
   
@@ -76,5 +76,8 @@ To oprogramowanie używa następujących bibliotek stron trzecich:
 - **GLFW** - licencjonowane na podstawie licencji zlib/libpng
 - **GLM** - licencjonowane na podstawie licencji MIT
 - **stb_image.h** - udostępnione w domenie publicznej (przez Seana Barretta)
-
+- **FBX SDK** – własność firmy **Autodesk, Inc.**, używana zgodnie z *Autodesk FBX SDK License Agreement**.
+FBX SDK może być używana wyłącznie do celów programistycznych i testowych. Jej redystrybucja jest zabroniona bez pisemnej zgody Autodesk.
+Szczegółowe warunki licencji dostępne są na stronie:
+https://www.autodesk.com/developer-network/platform-technologies/fbx-sdk-2020-0
 Więcej informacji można znaleźć w odpowiednich plikach licencyjnych dołączonych do kodu źródłowego.

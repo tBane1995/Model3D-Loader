@@ -33,8 +33,8 @@ public:
         int w, h;
         glfwGetWindowSize(window, &w, &h);
 
-        mouseSensitivity.x = 90.0f / float(w);
-        mouseSensitivity.y = 90.0f / float(h);
+        mouseSensitivity.x = 180.0f / float(w);
+        mouseSensitivity.y = 180.0f / float(h);
 
         zoom = 45.0f;
 
