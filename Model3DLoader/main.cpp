@@ -1,5 +1,7 @@
 ﻿#include <iostream>
 #include <vector>
+#include <map>
+#include <functional>
 #include <string>
 #include <fstream>
 #include <sstream>
@@ -27,6 +29,7 @@
 #include "Programs.hpp"
 #include "Materials.hpp"
 #include "Model3D.hpp"
+#include "AnimatedModel3D.hpp"
 
 
 bool cur_press;
@@ -114,6 +117,7 @@ int main() {
 
 	// set the context
 	glfwMakeContextCurrent(window);
+	glfwSwapInterval(0); // off V-Sync then FPS > 75
 
 	// initialize glad
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
@@ -179,19 +183,21 @@ int main() {
 	right_tree.loadObj(L"mdl\\tree.obj");
 	right_tree.setPosition(5, 0, 0);
 
-	Model3D knight;
-	knight.loadObj(L"mdl\\Knight.obj");
-	knight.setScale(2, 2, 2);
-	knight.setPosition(0, 0, 5);
+	//Model3D knight;
+	//knight.loadObj(L"mdl\\Knight.obj");
+	//knight.setScale(2, 2, 2);
+	//knight.setPosition(0, 0, 5);
 
 	Model3D rock;
 	rock.loadObj(L"mdl\\rock.obj");
 	rock.setScale(2, 2, 2);
 	rock.setPosition(0, 0, -5);
 
-	Model3D knightFBX;
-	knightFBX.loadFBX(L"mdl\\knight.FBX");
 	
+
+	AnimatedModel3D knightFBX;
+	knightFBX.loadFBX();
+	knightFBX.setPosition(0, 0, 5);
 
 	// cursor position
 	cur_press = false;
@@ -200,13 +206,22 @@ int main() {
 	// timers start
 	current_time = glfwGetTime();
 	prev_time = current_time;
-
+	
+	float fps_timer = glfwGetTime();
+	float FPS = 0;
 	// main program loop
 	while (!glfwWindowShouldClose(window))
 	{
 		prev_time = current_time;
 		current_time = glfwGetTime();
 
+		FPS += 1;
+		if (current_time - fps_timer >= 1.0) {
+			//std::cout << "FPS: " << FPS << "\n";
+			glfwSetWindowTitle(window, std::to_string(FPS).c_str());
+			FPS = 0;
+			fps_timer = current_time;
+		}
 
 		// events
 		events();
@@ -219,7 +234,7 @@ int main() {
 		plane.draw();
 		left_tree.draw();
 		right_tree.draw();
-		knight.draw();
+		knightFBX.draw();
 		rock.draw();
 		
 

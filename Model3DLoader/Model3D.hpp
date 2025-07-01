@@ -10,7 +10,7 @@ struct vertice {
 
 struct Mesh {
     std::vector<vertice> vertices;
-    Material* material;
+    Material* material = nullptr;
 };
 
 
@@ -28,6 +28,18 @@ public:
 
     unsigned int VAO = 0;
     unsigned int VBO = 0;
+
+    Model3D() {
+        v.clear();
+        vt.clear();
+        vn.clear();
+        meshes.clear();
+        mesh_draw_ranges.clear();
+    }
+
+    ~Model3D() {
+
+    }
 
     void setPosition(float x, float y, float z) {
         transform.setPosition(glm::vec3(x, y, z));
@@ -160,70 +172,7 @@ public:
 
         glBindVertexArray(0);
     }
-
     
-    void loadFBX(std::wstring path) {
-      
-        meshes.clear();
-        v.clear();
-        vt.clear();
-        vn.clear();
-        
-        // 1. Inicjalizacja menadżera FBX
-        FbxManager* manager = FbxManager::Create();
-        if (!manager) {
-            std::cerr << "Nie udało się utworzyć FbxManager.\n";
-            return;
-        }
-
-        
-        
-        FbxIOSettings* ios = FbxIOSettings::Create(manager, IOSROOT);
-        manager->SetIOSettings(ios);
-
-        
-
-        // 2. Importer
-        FbxImporter* importer = FbxImporter::Create(manager, "");
-        if (!importer->Initialize(ConvertWideToUtf8(path).c_str(), -1, manager->GetIOSettings())) {
-            std::cerr << "Nie udało się wczytać pliku FBX: " << importer->GetStatus().GetErrorString() << std::endl;
-            return;
-        }
-
-        // 3. Załaduj scenę
-        FbxScene* scene = FbxScene::Create(manager, "scene");
-        importer->Import(scene);
-        importer->Destroy();
-
-        // 4. Odwiedź węzły sceny
-        FbxNode* root = scene->GetRootNode();
-        if (root) {
-            for (int i = 0; i < root->GetChildCount(); i++) {
-                FbxNode* child = root->GetChild(i);
-                if (child->GetNodeAttribute() &&
-                    child->GetNodeAttribute()->GetAttributeType() == FbxNodeAttribute::eMesh) {
-                    FbxMesh* mesh = (FbxMesh*)child->GetNodeAttribute();
-
-                    std::cout << "Mesh: " << child->GetName() << std::endl;
-
-                    int vertexCount = mesh->GetControlPointsCount();
-                    FbxVector4* vertices = mesh->GetControlPoints();
-                    for (int v = 0; v < vertexCount; v++) {
-                        std::cout << "Vertex[" << v << "] = ("
-                            << vertices[v][0] << ", "
-                            << vertices[v][1] << ", "
-                            << vertices[v][2] << ")" << std::endl;
-                    }
-                }
-            }
-        }
-
-        // 5. Zwolnij pamięć
-        manager->Destroy();
-        
-    }
-    
-
     void draw() {
 
         Program* program = getProgram(L"advanced program");
@@ -237,7 +186,7 @@ public:
 
             glActiveTexture(GL_TEXTURE0);
 
-            (meshes[i].material)? glBindTexture(GL_TEXTURE_2D, meshes[i].material->texture->id) : glBindTexture(GL_TEXTURE_2D, 0);
+            (meshes[i].material != nullptr)? glBindTexture(GL_TEXTURE_2D, meshes[i].material->texture->id) : glBindTexture(GL_TEXTURE_2D, 0);
           
             glUniform1i(glGetUniformLocation(program->shader_program, "texture1"), 0);
             glUniform3f(glGetUniformLocation(program->shader_program, "fogColor"), 0.25f, 0.25f, 0.25f);
@@ -286,5 +235,6 @@ public:
         glBindVertexArray(0);
     }
 };
+
 
 #endif

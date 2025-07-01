@@ -22,6 +22,7 @@ target_sources(${PROJECT_NAME} PRIVATE
     Model3DLoader/Programs.hpp
     Model3DLoader/Materials.hpp
     Model3DLoader/Model3D.hpp
+    Model3DLoader/AnimatedModel3D.hpp
 )
 
 # Standard C++

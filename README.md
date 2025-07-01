@@ -76,7 +76,7 @@ To oprogramowanie używa następujących bibliotek stron trzecich:
 - **GLFW** - licencjonowane na podstawie licencji zlib/libpng
 - **GLM** - licencjonowane na podstawie licencji MIT
 - **stb_image.h** - udostępnione w domenie publicznej (przez Seana Barretta)
-- **FBX SDK** – własność firmy **Autodesk, Inc.**, używana zgodnie z *Autodesk FBX SDK License Agreement**.
+- **FBX SDK** – własność firmy **Autodesk, Inc.**, używana zgodnie z **Autodesk FBX SDK License Agreement**.
 FBX SDK może być używana wyłącznie do celów programistycznych i testowych. Jej redystrybucja jest zabroniona bez pisemnej zgody Autodesk.
 Szczegółowe warunki licencji dostępne są na stronie:
 https://www.autodesk.com/developer-network/platform-technologies/fbx-sdk-2020-0
