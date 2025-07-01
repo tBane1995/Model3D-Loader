@@ -24,7 +24,6 @@ public:
     std::vector<float> vn;   // normalne
 
     std::vector<Mesh> meshes;
-    std::vector<std::pair<int, int>> mesh_draw_ranges; // offset, count
 
     unsigned int VAO = 0;
     unsigned int VBO = 0;
@@ -34,7 +33,6 @@ public:
         vt.clear();
         vn.clear();
         meshes.clear();
-        mesh_draw_ranges.clear();
     }
 
     ~Model3D() {
@@ -145,12 +143,9 @@ public:
         }
 
         // Łączenie wszystkich meshów w jeden bufor
-        std::vector<vertice> buffer_vertices;
-        mesh_draw_ranges.clear();        
-        
+        std::vector<vertice> buffer_vertices;        
         int offset = 0;
         for (const auto& mesh : meshes) {
-            mesh_draw_ranges.emplace_back(offset, mesh.vertices.size());
             buffer_vertices.insert(buffer_vertices.end(), mesh.vertices.begin(), mesh.vertices.end());
             offset += mesh.vertices.size();
         }
@@ -179,6 +174,7 @@ public:
 
         glBindVertexArray(VAO);
         
+        unsigned int offset = 0;
 
         for (int i = 0; i < meshes.size(); ++i) {
 
@@ -227,8 +223,7 @@ public:
             glUniform3fv(glGetUniformLocation(program->shader_program, "Ks"), 1, &meshes[i].material->Ks[0]);
             //glUniform3fv(glGetUniformLocation(program->shader_program, "Ke"), 1, &meshes[i].material->Ks[0]);
 
-            auto [offset, count] = mesh_draw_ranges[i];
-            glDrawArrays(GL_TRIANGLES, offset, count);
+            glDrawArrays(GL_TRIANGLES, offset, meshes[i].vertices.size());
             offset += meshes[i].vertices.size();
         }
 

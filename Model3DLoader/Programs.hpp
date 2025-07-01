@@ -41,7 +41,7 @@ std::vector < Program* > programs;
 
 void addProgram(std::wstring name, const char* vertex_shader_source, const char* fragment_shader_source) {
 	programs.push_back(new Program(name, vertex_shader_source, fragment_shader_source));
-	std::wcout << L"loaded program: " << name << "\n";
+	//std::wcout << L"loaded program: " << name << "\n";
 }
 
 Program* getProgram(std::wstring name) {

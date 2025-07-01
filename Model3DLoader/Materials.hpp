@@ -61,7 +61,7 @@ void addLibMaterials(std::wstring path) {
         else if (prefix == L"map_Kd") {
             std::wstring tname;
             ss >> tname;
-            std::wcout << tname << L"\n";
+            //std::wcout << tname << L"\n";
             mtl->texture = getTexture(tname);
         }
         else if (prefix == L"Ka") {

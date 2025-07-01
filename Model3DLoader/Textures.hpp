@@ -14,7 +14,6 @@ public:
         this->path = path;
         this->id = id;
 
-
         glGenTextures(1, &this->id);
         glBindTexture(GL_TEXTURE_2D, this->id);
 
@@ -48,7 +47,7 @@ std::vector < Texture* > textures;
 
 void addTexture(std::wstring path) {
     textures.push_back(new Texture(path, textures.size()));
-    std::wcout << L"loaded texture: " << path << "\n";
+    //std::wcout << L"loaded texture: " << path << "\n";
 }
 
 Texture* getTexture(std::wstring path) {

@@ -183,22 +183,21 @@ int main() {
 	right_tree.loadObj(L"mdl\\tree.obj");
 	right_tree.setPosition(5, 0, 0);
 
-	//Model3D knight;
-	//knight.loadObj(L"mdl\\Knight.obj");
-	//knight.setScale(2, 2, 2);
-	//knight.setPosition(0, 0, 5);
-
 	Model3D rock;
 	rock.loadObj(L"mdl\\rock.obj");
 	rock.setScale(2, 2, 2);
 	rock.setPosition(0, 0, -5);
 
-	
+	Model3D knightOBJ;
+	knightOBJ.loadObj(L"mdl\\Knight.obj");
+	//knightOBJ.setScale(2, 2, 2);
+	knightOBJ.setPosition(-2, 0, 5);
 
 	AnimatedModel3D knightFBX;
-	knightFBX.loadFBX();
+	knightFBX.loadFBX(L"mdl\\knight.FBX");
+	knightFBX.loadFBXAnimation(L"anm\\WK_heavy_infantry_06_combat_walk.FBX");
 	knightFBX.setPosition(0, 0, 5);
-
+	
 	// cursor position
 	cur_press = false;
 	glfwGetCursorPos(window, &cur_pos_x, &cur_pos_y);
@@ -226,6 +225,9 @@ int main() {
 		// events
 		events();
 
+		// update
+		knightFBX.update();
+
 		// render - clear
 		glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -234,6 +236,7 @@ int main() {
 		plane.draw();
 		left_tree.draw();
 		right_tree.draw();
+		knightOBJ.draw();
 		knightFBX.draw();
 		rock.draw();
 		

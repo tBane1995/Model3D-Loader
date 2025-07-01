@@ -1,60 +1,36 @@
 ﻿#ifndef AnimatedModel3D_hpp
 #define AnimatedModel3D_hpp
 
-struct BoneKeyframe {
-    FbxTime time;
-    FbxVector4 translation;
-    FbxVector4 rotation; // euler angles
-    FbxVector4 scale;
+struct AnimationVertice {
+    Mesh* mesh = nullptr;
+    int vertice_index;
+    float x, y, z;
 };
 
-struct BoneAnim {
-    std::string name;
-    std::vector<BoneKeyframe> keyframes;
+struct Frame {
+    float time;
+    std::vector < AnimationVertice > move_vertices;
 };
-
-struct AnimationClip {
-    double duration; // in seconds
-    std::map<std::string, BoneAnim> boneAnimations;
-};
-
-/*
-BoneKeyframe Interpolate(const BoneAnim& anim, double timeInSec) {
-    if (anim.keyframes.size() == 1)
-        return anim.keyframes[0];
-
-    for (size_t i = 0; i < anim.keyframes.size() - 1; ++i) {
-        double t1 = anim.keyframes[i].time.GetSecondDouble();
-        double t2 = anim.keyframes[i + 1].time.GetSecondDouble();
-        if (timeInSec >= t1 && timeInSec <= t2) {
-            double factor = (timeInSec - t1) / (t2 - t1);
-            BoneKeyframe result;
-            result.translation = anim.keyframes[i].translation + (anim.keyframes[i + 1].translation - anim.keyframes[i].translation) * factor;
-            result.rotation = anim.keyframes[i].rotation + (anim.keyframes[i + 1].rotation - anim.keyframes[i].rotation) * factor;
-            result.scale = anim.keyframes[i].scale + (anim.keyframes[i + 1].scale - anim.keyframes[i].scale) * factor;
-            return result;
-        }
-    }
-
-    return anim.keyframes.back();
-}
-*/
 
 class AnimatedModel3D {
 public:
     Transform transform;
 
     std::vector<Mesh> meshes;
-    std::vector<std::pair<int, int>> mesh_draw_ranges; // offset, count
 
     unsigned int VAO = 0;
     unsigned int VBO = 0;
 
-    AnimationClip animation;
-    double animationTime = 0.0;
+    std::vector<Frame> frames;
+    std::vector<Mesh> animated_meshes;
+    unsigned int current_frame;
+
+    //AnimationClip animation;
+    //double animationTime = 0.0;
 
     AnimatedModel3D() {
         meshes.clear();
+        current_frame = 0;
     }
     ~AnimatedModel3D() {}
 
@@ -66,7 +42,33 @@ public:
         transform.setScale(glm::vec3(x, y, z));
     }
 
-    void loadFBX() {
+    void updateVerticesBuffer() {
+        // Łączenie wszystkich meshów w jeden bufor
+        std::vector<vertice> buffer_vertices;
+
+        for (const auto& mesh : meshes)
+            buffer_vertices.insert(buffer_vertices.end(), mesh.vertices.begin(), mesh.vertices.end());
+     
+
+        // VAO i VBO
+        glGenVertexArrays(1, &VAO);
+        glGenBuffers(1, &VBO);
+
+        glBindVertexArray(VAO);
+        glBindBuffer(GL_ARRAY_BUFFER, VBO);
+        glBufferData(GL_ARRAY_BUFFER, buffer_vertices.size() * sizeof(vertice), buffer_vertices.data(), GL_STATIC_DRAW);
+
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(vertice), (void*)offsetof(vertice, x));
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(vertice), (void*)offsetof(vertice, u));
+        glEnableVertexAttribArray(1);
+        glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(vertice), (void*)offsetof(vertice, nx));
+        glEnableVertexAttribArray(2);
+
+        glBindVertexArray(0);
+    }
+
+    void loadFBX(std::wstring pathfile) {
 
         meshes.clear();
 
@@ -75,7 +77,7 @@ public:
         manager->SetIOSettings(ios);
 
         FbxImporter* importer = FbxImporter::Create(manager, "");
-        if (!importer->Initialize("mdl\\knight.FBX", -1, manager->GetIOSettings())) {
+        if (!importer->Initialize(ConvertWideToUtf8(pathfile).c_str(), -1, manager->GetIOSettings())) {
             std::cerr << "Błąd: nie udało się wczytać modelu." << std::endl;
             return;
         }
@@ -87,7 +89,7 @@ public:
         FbxNode* root = scene->GetRootNode();
         if (!root) return;
 
-
+        // load the Meshes
         std::function<void(FbxNode*)> traverse = [&](FbxNode* node) {
             FbxMesh* mesh = node->GetMesh();
             if (mesh) {
@@ -123,16 +125,13 @@ public:
                             }
                         }
 
-                        
+                        FbxDouble3 localScale = node->LclScaling.Get();
+                        double toMeters = FbxSystemUnit::m.GetConversionFactorFrom(scene->GetGlobalSettings().GetSystemUnit());
 
                         vertice vv;
-                        const float globalFix = 0.1f; // zmniejsz 100×
-                        double sceneScale = scene->GetGlobalSettings().GetSystemUnit().GetScaleFactor(); // np. 2.54
-                        float scaleFactor = 1.0f / static_cast<float>(sceneScale);
-
-                        vv.x = float(v[0]) * scaleFactor * globalFix;
-                        vv.y = float(v[2]) * scaleFactor * globalFix;
-                        vv.z = -float(v[1]) * scaleFactor * globalFix;
+                        vv.x = float(v[0] * localScale[0] * toMeters);
+                        vv.y = float(v[2] * localScale[2] * toMeters);
+                        vv.z = -float(v[1] * localScale[1] * toMeters);
 
                         vv.u = float(uv[0]);
                         vv.v = float(uv[1]);
@@ -149,96 +148,145 @@ public:
                 meshes.push_back(m);
             }
 
-            // Rekurencja dla dzieci
             for (int i = 0; i < node->GetChildCount(); ++i)
                 traverse(node->GetChild(i));
             };
 
         traverse(root);
-        
-        // Łączenie wszystkich meshów w jeden bufor
-        std::vector<vertice> buffer_vertices;
-        mesh_draw_ranges.clear();
 
-        int offset = 0;
-        for (const auto& mesh : meshes) {
-            mesh_draw_ranges.emplace_back(offset, mesh.vertices.size());
-            buffer_vertices.insert(buffer_vertices.end(), mesh.vertices.begin(), mesh.vertices.end());
-            offset += mesh.vertices.size();
+        animated_meshes = meshes;
+
+        updateVerticesBuffer();
+    }
+
+    void ProcessNode(FbxNode* pNode, FbxAnimLayer* pAnimLayer, FbxTime time) {
+        if (!pNode) return;
+
+        FbxAMatrix globalTransform = pNode->EvaluateGlobalTransform(time);
+
+        FbxMesh* mesh = pNode->GetMesh();
+        if (mesh) {
+            int vertexCount = mesh->GetControlPointsCount();
+            FbxVector4* controlPoints = mesh->GetControlPoints();
+
+            for (int i = 0; i < vertexCount; i++) {
+                FbxVector4 localPos = controlPoints[i];
+                FbxVector4 worldPos = globalTransform.MultT(localPos);
+
+                std::cout << "vertex[" << i << "] = "
+                    << worldPos[0] << ", "
+                    << worldPos[1] << ", "
+                    << worldPos[2] << "\n";
+            }
+        }
+        else
+            std::wcout << L"mesh is empty\n";
+
+        int childCount = pNode->GetChildCount();
+        for (int i = 0; i < childCount; i++) {
+            ProcessNode(pNode->GetChild(i), pAnimLayer, time);
+        }
+    }
+
+    void loadFBXAnimation(std::wstring path) {
+        FbxManager* manager = FbxManager::Create();
+        FbxIOSettings* ios = FbxIOSettings::Create(manager, IOSROOT);
+        manager->SetIOSettings(ios);
+
+        FbxImporter* importer = FbxImporter::Create(manager, "");
+        if (!importer->Initialize(ConvertWideToUtf8(path).c_str(), -1, manager->GetIOSettings())) {
+            std::wcout << L"Błąd: nie udało się wczytać animacji: " << path << L"\n";
+            return;
         }
 
-        // VAO i VBO
-        glGenVertexArrays(1, &VAO);
-        glGenBuffers(1, &VBO);
+        FbxScene* scene = FbxScene::Create(manager, "");
+        
+        importer->Import(scene);
+        importer->Destroy();
 
-        glBindVertexArray(VAO);
-        glBindBuffer(GL_ARRAY_BUFFER, VBO);
-        glBufferData(GL_ARRAY_BUFFER, buffer_vertices.size() * sizeof(vertice), buffer_vertices.data(), GL_STATIC_DRAW);
+        FbxAnimStack* animStack = scene->GetSrcObject<FbxAnimStack>(0);
+        if (!animStack) {
+            std::cout << "Brak animacji\n";
+            return;
+        }
 
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(vertice), (void*)offsetof(vertice, x));
-        glEnableVertexAttribArray(0);
-        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(vertice), (void*)offsetof(vertice, u));
-        glEnableVertexAttribArray(1);
-        glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(vertice), (void*)offsetof(vertice, nx));
-        glEnableVertexAttribArray(2);
+        int animCount = scene->GetSrcObjectCount<FbxAnimStack>();
+        if (animCount == 0) {
+            std::cout << "Brak animacji\n";
+            return;
+        }
 
-        glBindVertexArray(0);
-    }
 
-    
-    /*
-    AnimationClip LoadFBXAnimation(FbxScene* scene) {
-        AnimationClip clip;
-        FbxAnimStack* animStack = scene->GetCurrentAnimationStack();
-        if (!animStack) return clip;
+        for (int i = 0; i < animCount; i++) {
+            FbxAnimStack* animStack = scene->GetSrcObject<FbxAnimStack>(i);
+            FbxAnimLayer* animLayer = animStack->GetMember<FbxAnimLayer>(0);
 
-        FbxAnimLayer* animLayer = animStack->GetMember<FbxAnimLayer>(0);
-        FbxNode* rootNode = scene->GetRootNode();
-        if (!rootNode) return clip;
+            // ...
 
-        FbxTimeSpan timeSpan;
-        scene->GetGlobalSettings().GetTimelineDefaultTimeSpan(timeSpan);
-        clip.duration = timeSpan.GetDuration().GetSecondDouble();
+            std::cout << "wczytuje animacje nr " << i << " - " << animStack->GetName() << "\n";
 
-        std::function<void(FbxNode*)> traverse = [&](FbxNode* node) {
-            BoneAnim boneAnim;
-            boneAnim.name = node->GetName();
+            scene->SetCurrentAnimationStack(animStack);
 
-            FbxAnimCurve* tCurveX = node->LclTranslation.GetCurve(animLayer, FBXSDK_CURVENODE_COMPONENT_X);
-            FbxAnimCurve* tCurveY = node->LclTranslation.GetCurve(animLayer, FBXSDK_CURVENODE_COMPONENT_Y);
-            FbxAnimCurve* tCurveZ = node->LclTranslation.GetCurve(animLayer, FBXSDK_CURVENODE_COMPONENT_Z);
+            // show time of animation
+            FbxTakeInfo* takeInfo = scene->GetTakeInfo(animStack->GetName());
+            std::cout << "anim start: " << takeInfo->mLocalTimeSpan.GetStart().GetSecondDouble() << "s \n";
+            std::cout << "anim stop: " << takeInfo->mLocalTimeSpan.GetStop().GetSecondDouble() << "s \n";
+            
+            // ...
 
-            int keyCount = tCurveX ? tCurveX->KeyGetCount() : 0;
-            for (int i = 0; i < keyCount; ++i) {
-                FbxTime time = tCurveX->KeyGetTime(i);
+            FbxTime currentTime = takeInfo->mLocalTimeSpan.GetStart();
+            FbxTime frameTime;
+            frameTime.SetTime(0, 0, 0, 1, 0, scene->GetGlobalSettings().GetTimeMode()); // klatka co 1 frame
 
-                BoneKeyframe kf;
-                kf.time = time;
-                kf.translation = node->LclTranslation.EvaluateValue(time);
-                kf.rotation = node->LclRotation.EvaluateValue(time);
-                kf.scale = node->LclScaling.EvaluateValue(time);
-                boneAnim.keyframes.push_back(kf);
+            while (currentTime <= takeInfo->mLocalTimeSpan.GetStop()) {
+                
+                std::cout << "time: " << currentTime.GetSecondDouble() << "s\n";
+                
+                ProcessNode(scene->GetRootNode(), animLayer, currentTime);
+                currentTime += frameTime;
             }
 
-            if (!boneAnim.keyframes.empty())
-                clip.boneAnimations[boneAnim.name] = boneAnim;
-
-            for (int i = 0; i < node->GetChildCount(); ++i)
-                traverse(node->GetChild(i));
-            };
-
-        for (int i = 0; i < rootNode->GetChildCount(); ++i)
-            traverse(rootNode->GetChild(i));
-
-        return clip;
+        }
     }
-    */
+
+    void animate() {
+
+        //std::cout << "frame: " << current_frame << "\n";
+
+        if (frames.empty() || meshes.empty())
+            return;
+
+        const Frame& frame = frames[current_frame];
+
+        if (current_time - frame.time > 1.0f) {
+
+            for (auto& mv : frame.move_vertices) {
+                mv.mesh->vertices[mv.vertice_index].x = mv.x;
+                mv.mesh->vertices[mv.vertice_index].y = mv.y;
+                mv.mesh->vertices[mv.vertice_index].z = mv.z;
+            }
+
+            updateVerticesBuffer();
+
+            current_frame++;
+            if (current_frame >= frames.size()) {
+                current_frame = 0;
+            }
+        }
+    }
+
+
+    void update() {
+        //animate();
+    }
 
     void draw() {
 
         Program* program = getProgram(L"advanced program");
 
         glBindVertexArray(VAO);
+        
+        unsigned int offset = 0;
 
         for (int i = 0; i < meshes.size(); ++i) {
 
@@ -276,8 +324,6 @@ public:
             static float lightRange = 10.0f;
             //lightRange += 0.0001f;
 
-
-
             // Pozycje światła i kamery
             glUniform3f(glGetUniformLocation(program->shader_program, "LightPosition"), lightPos.x, lightPos.y, lightPos.z);
             glUniform3fv(glGetUniformLocation(program->shader_program, "LightColor"), 1, &lightColor[0]);
@@ -288,8 +334,7 @@ public:
             glUniform3fv(glGetUniformLocation(program->shader_program, "Ks"), 1, &meshes[i].material->Ks[0]);
             //glUniform3fv(glGetUniformLocation(program->shader_program, "Ke"), 1, &meshes[i].material->Ks[0]);
 
-            auto [offset, count] = mesh_draw_ranges[i];
-            glDrawArrays(GL_TRIANGLES, offset, count);
+            glDrawArrays(GL_TRIANGLES, offset, meshes[i].vertices.size());
             offset += meshes[i].vertices.size();
         }
 
