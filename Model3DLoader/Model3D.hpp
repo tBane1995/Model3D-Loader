@@ -11,6 +11,7 @@ struct vertice {
 struct Mesh {
     std::vector<vertice> vertices;
     Material* material = nullptr;
+    FbxMesh* fbx_mesh = nullptr;
 };
 
 

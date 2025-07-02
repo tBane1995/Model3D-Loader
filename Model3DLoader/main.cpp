@@ -190,14 +190,15 @@ int main() {
 
 	Model3D knightOBJ;
 	knightOBJ.loadObj(L"mdl\\Knight.obj");
-	//knightOBJ.setScale(2, 2, 2);
+	knightOBJ.setScale(2, 2, 2);
 	knightOBJ.setPosition(-2, 0, 5);
 
 	AnimatedModel3D knightFBX;
 	knightFBX.loadFBX(L"mdl\\knight.FBX");
 	knightFBX.loadFBXAnimation(L"anm\\WK_heavy_infantry_06_combat_walk.FBX");
-	knightFBX.setPosition(0, 0, 5);
-	
+	knightFBX.setScale(2, 2, 2);
+	knightFBX.setPosition(2, 0, 5);
+
 	// cursor position
 	cur_press = false;
 	glfwGetCursorPos(window, &cur_pos_x, &cur_pos_y);

@@ -25,12 +25,18 @@ public:
     std::vector<Mesh> animated_meshes;
     unsigned int current_frame;
 
-    //AnimationClip animation;
-    //double animationTime = 0.0;
+    FbxManager* manager = nullptr;
+    FbxIOSettings* ios = nullptr;
+    FbxScene* modelScene = nullptr;
 
     AnimatedModel3D() {
         meshes.clear();
         current_frame = 0;
+
+        manager = FbxManager::Create();
+
+        ios = FbxIOSettings::Create(manager, IOSROOT);
+        manager->SetIOSettings(ios);
     }
     ~AnimatedModel3D() {}
 
@@ -72,21 +78,18 @@ public:
 
         meshes.clear();
 
-        FbxManager* manager = FbxManager::Create();
-        FbxIOSettings* ios = FbxIOSettings::Create(manager, IOSROOT);
-        manager->SetIOSettings(ios);
-
         FbxImporter* importer = FbxImporter::Create(manager, "");
         if (!importer->Initialize(ConvertWideToUtf8(pathfile).c_str(), -1, manager->GetIOSettings())) {
-            std::cerr << "Błąd: nie udało się wczytać modelu." << std::endl;
+            std::wcout << L"Błąd: nie udało się wczytać animacji: " << pathfile << L"\n";
             return;
         }
 
-        FbxScene* scene = FbxScene::Create(manager, "myScene");
-        importer->Import(scene);
+        modelScene = FbxScene::Create(manager, "myScene");
+
+        importer->Import(modelScene);
         importer->Destroy();
 
-        FbxNode* root = scene->GetRootNode();
+        FbxNode* root = modelScene->GetRootNode();
         if (!root) return;
 
         // load the Meshes
@@ -126,7 +129,7 @@ public:
                         }
 
                         FbxDouble3 localScale = node->LclScaling.Get();
-                        double toMeters = FbxSystemUnit::m.GetConversionFactorFrom(scene->GetGlobalSettings().GetSystemUnit());
+                        double toMeters = FbxSystemUnit::m.GetConversionFactorFrom(modelScene->GetGlobalSettings().GetSystemUnit());
 
                         vertice vv;
                         vv.x = float(v[0] * localScale[0] * toMeters);
@@ -154,63 +157,75 @@ public:
 
         traverse(root);
 
-        animated_meshes = meshes;
-
         updateVerticesBuffer();
     }
 
     void ProcessNode(FbxNode* pNode, FbxAnimLayer* pAnimLayer, FbxTime time) {
-        if (!pNode) return;
-
-        FbxAMatrix globalTransform = pNode->EvaluateGlobalTransform(time);
-
-        FbxMesh* mesh = pNode->GetMesh();
-        if (mesh) {
-            int vertexCount = mesh->GetControlPointsCount();
-            FbxVector4* controlPoints = mesh->GetControlPoints();
-
-            for (int i = 0; i < vertexCount; i++) {
-                FbxVector4 localPos = controlPoints[i];
-                FbxVector4 worldPos = globalTransform.MultT(localPos);
-
-                std::cout << "vertex[" << i << "] = "
-                    << worldPos[0] << ", "
-                    << worldPos[1] << ", "
-                    << worldPos[2] << "\n";
-            }
+        if (!pNode) {
+            return;
         }
-        else
-            std::wcout << L"mesh is empty\n";
+        
+        // mesh is nullptr so make a metrices
+        FbxAnimEvaluator* anim_eval = pNode->GetAnimationEvaluator();
+
+        FbxAMatrix localTransform = anim_eval->GetNodeLocalTransform(pNode, time);
+        
+        FbxVector4 t = localTransform.GetT(); // translacja
+        FbxVector4 r = localTransform.GetR(); // rotacja
+        FbxVector4 s = localTransform.GetS(); // skala
+
+        std::cout << "Node: " << pNode->GetName() << "\n";
+        std::cout << "  Local T: " << t[0] << ", " << t[1] << ", " << t[2] << "\n";
+        std::cout << "  Local R: " << r[0] << ", " << r[1] << ", " << r[2] << "\n";
+        std::cout << "  Local S: " << s[0] << ", " << s[1] << ", " << s[2] << "\n";
+
+        //
+        // teraz przypisac wierzcholki do modelScene
+        // modelScene
+        //
+
+        /*
+        glm::mat4 view = cam->GetViewMatrix();
+        glm::mat4 projection = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 400.0f);
+        glm::mat4 model = glm::mat4(1.0f);
+
+        model = glm::translate(model, transform.position);
+        model = glm::rotate(model, glm::radians(transform.rotation.x), glm::vec3(1.0f, 0.0f, 0.0f));
+        model = glm::rotate(model, glm::radians(transform.rotation.y), glm::vec3(0.0f, 1.0f, 0.0f));
+        model = glm::rotate(model, glm::radians(transform.rotation.z), glm::vec3(0.0f, 0.0f, 1.0f));
+        model = glm::scale(model, transform.scale);
+        */
+
+        /////////////
+
+        ////////////
 
         int childCount = pNode->GetChildCount();
         for (int i = 0; i < childCount; i++) {
             ProcessNode(pNode->GetChild(i), pAnimLayer, time);
         }
     }
-
-    void loadFBXAnimation(std::wstring path) {
-        FbxManager* manager = FbxManager::Create();
-        FbxIOSettings* ios = FbxIOSettings::Create(manager, IOSROOT);
-        manager->SetIOSettings(ios);
+    
+    void loadFBXAnimation(std::wstring pathfile) {
 
         FbxImporter* importer = FbxImporter::Create(manager, "");
-        if (!importer->Initialize(ConvertWideToUtf8(path).c_str(), -1, manager->GetIOSettings())) {
-            std::wcout << L"Błąd: nie udało się wczytać animacji: " << path << L"\n";
+        if (!importer->Initialize(ConvertWideToUtf8(pathfile).c_str(), -1, manager->GetIOSettings())) {
+            std::wcout << L"Błąd: nie udało się wczytać animacji: " << pathfile << L"\n";
             return;
         }
-
-        FbxScene* scene = FbxScene::Create(manager, "");
         
-        importer->Import(scene);
+        FbxScene* animScene = FbxScene::Create(manager, "animation");
+
+        importer->Import(animScene);
         importer->Destroy();
 
-        FbxAnimStack* animStack = scene->GetSrcObject<FbxAnimStack>(0);
+        FbxAnimStack* animStack = animScene->GetSrcObject<FbxAnimStack>(0);
         if (!animStack) {
             std::cout << "Brak animacji\n";
             return;
         }
 
-        int animCount = scene->GetSrcObjectCount<FbxAnimStack>();
+        int animCount = animScene->GetSrcObjectCount<FbxAnimStack>();
         if (animCount == 0) {
             std::cout << "Brak animacji\n";
             return;
@@ -218,17 +233,17 @@ public:
 
 
         for (int i = 0; i < animCount; i++) {
-            FbxAnimStack* animStack = scene->GetSrcObject<FbxAnimStack>(i);
+            FbxAnimStack* animStack = animScene->GetSrcObject<FbxAnimStack>(i);
             FbxAnimLayer* animLayer = animStack->GetMember<FbxAnimLayer>(0);
 
             // ...
 
-            std::cout << "wczytuje animacje nr " << i << " - " << animStack->GetName() << "\n";
+            std::cout << "load animation no " << i << " : \"" << animStack->GetName() << "\"\n";
 
-            scene->SetCurrentAnimationStack(animStack);
+            animScene->SetCurrentAnimationStack(animStack);
 
             // show time of animation
-            FbxTakeInfo* takeInfo = scene->GetTakeInfo(animStack->GetName());
+            FbxTakeInfo* takeInfo = animScene->GetTakeInfo(animStack->GetName());
             std::cout << "anim start: " << takeInfo->mLocalTimeSpan.GetStart().GetSecondDouble() << "s \n";
             std::cout << "anim stop: " << takeInfo->mLocalTimeSpan.GetStop().GetSecondDouble() << "s \n";
             
@@ -236,29 +251,53 @@ public:
 
             FbxTime currentTime = takeInfo->mLocalTimeSpan.GetStart();
             FbxTime frameTime;
-            frameTime.SetTime(0, 0, 0, 1, 0, scene->GetGlobalSettings().GetTimeMode()); // klatka co 1 frame
+            frameTime.SetTime(0, 0, 0, 1, 0, animScene->GetGlobalSettings().GetTimeMode()); // klatka co 1 frame
+
+            FbxNode* root = animScene->GetRootNode();
+            if (!root) {
+                std::cout << "rootNode is nullptr\n";
+                return;
+            }
+                
 
             while (currentTime <= takeInfo->mLocalTimeSpan.GetStop()) {
+                static int i = 0;
+                std::cout << "frame: " << i++ << "\ttime: " << currentTime.GetSecondDouble() << "s\n";
                 
-                std::cout << "time: " << currentTime.GetSecondDouble() << "s\n";
-                
-                ProcessNode(scene->GetRootNode(), animLayer, currentTime);
+                ProcessNode(root, animLayer, currentTime);
                 currentTime += frameTime;
             }
 
         }
     }
-
+    
     void animate() {
 
         //std::cout << "frame: " << current_frame << "\n";
+        /*
+        if (frames.size() < 3000) {
+            Frame f;
+            f.time = current_time;
+            for (auto& m : meshes) {
+                for (int i = 0; i < m.vertices.size(); i++) {
+                    AnimationVertice av;
+                    av.mesh = &m;
+                    av.vertice_index = i;
+                    av.x = m.vertices[i].x;
+                    av.y = m.vertices[i].y;
+                    av.z = m.vertices[i].z + 0.001f;
+                    f.move_vertices.push_back(av);
+                }
+            }
+            frames.push_back(f);
+        }
+
+        */
 
         if (frames.empty() || meshes.empty())
             return;
 
         const Frame& frame = frames[current_frame];
-
-        if (current_time - frame.time > 1.0f) {
 
             for (auto& mv : frame.move_vertices) {
                 mv.mesh->vertices[mv.vertice_index].x = mv.x;
@@ -272,12 +311,11 @@ public:
             if (current_frame >= frames.size()) {
                 current_frame = 0;
             }
-        }
     }
-
+    
 
     void update() {
-        //animate();
+        animate();
     }
 
     void draw() {
